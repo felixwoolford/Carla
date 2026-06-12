@@ -1073,7 +1073,7 @@ class AbstractPluginSlot(QFrame, PluginEditParentMeta):
         # -------------------------------------------------------------
         # Bypass and Enable/Disable
 
-        actBypass = menu.addAction(self.tr("Bypass"))
+        actBypass = menu.addAction(self.tr("Bypass") + "\tB / Middle-click")
         actEnable = menu.addAction(self.tr("Disable") if self.fIsActive else self.tr("Enable"))
         menu.addSeparator()
 
