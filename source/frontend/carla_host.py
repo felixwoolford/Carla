@@ -440,6 +440,10 @@ class HostWindow(QMainWindow):
           }
         """)
 
+        # Bypass key toggle
+        self.fShortToggleBypass = QShortcut(QKeySequence("B"), self)
+        self.fShortToggleBypass.activated.connect(self.slot_toggleBypassSelected)
+
         # ----------------------------------------------------------------------------------------------------
         # Set up GUI (patchbay)
 
@@ -532,10 +536,6 @@ class HostWindow(QMainWindow):
             self.ui.b_transport_forwards.setIcon(getIcon('media-seek-forward', 16, 'svgz'))
             self.ui.logs_clear.setIcon(getIcon('edit-clear', 16, 'svgz'))
             self.ui.logs_save.setIcon(getIcon('document-save', 16, 'svgz'))
-
-        # Bypass key toggle
-        self.fShortToggleBypass = QShortcut(QKeySequence("B"), self)
-        self.fShortToggleBypass.activated.connect(self.slot_toggleBypassSelected)
 
         # ----------------------------------------------------------------------------------------------------
         # Connect actions to functions
