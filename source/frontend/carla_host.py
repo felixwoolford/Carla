@@ -1532,15 +1532,8 @@ class HostWindow(QMainWindow):
         if row < 0 or row >= len(self.fPluginList):
             return
         pitem = self.fPluginList[row]
-        if pitem is None:
-            return
-        widget = pitem.getWidget()
-        if (widget.fPluginInfo['hints'] & PLUGIN_CAN_DRYWET) == 0:
-            return
-        pid = widget.fPluginId
-        value = 0.0 if self.host.get_internal_parameter_value(pid, PARAMETER_DRYWET) != 0.0 else 1.0
-        self.host.set_drywet(pid, value)
-        widget.setParameterValue(PARAMETER_DRYWET, value, True)
+        if pitem is not None:
+            pitem.getWidget().toggleDryWetBypass()
 
     # --------------------------------------------------------------------------------------------------------
     # Plugins (host callbacks)

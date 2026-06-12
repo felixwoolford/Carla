@@ -238,6 +238,9 @@ class AbstractPluginSlot(QFrame, PluginEditParentMeta):
         # used during testing
         self.fIdleTimerId = 0
 
+        # used to retain wet/dry when bypassing
+        self.fSavedDryWet = 1.0
+
         # -------------------------------------------------------------
         # Set-up GUI
 
@@ -872,6 +875,24 @@ class AbstractPluginSlot(QFrame, PluginEditParentMeta):
     def optionChanged(self, option, yesNo):
         pass
 
+
+    def toggleDryWetBypass(self):
+        if (self.fPluginInfo['hints'] & PLUGIN_CAN_DRYWET) == 0:
+            return
+
+        current = self.host.get_internal_parameter_value(self.fPluginId, PARAMETER_DRYWET)
+
+        if current != 0.0:
+            # entering bypass: remember the wet level, then go fully dry
+            self.fSavedDryWet = current
+            value = 0.0
+        else:
+            # leaving bypass: restore the remembered wet level
+            value = self.fSavedDryWet if self.fSavedDryWet > 0.0 else 1.0
+
+        self.host.set_drywet(self.fPluginId, value)
+        self.setParameterValue(PARAMETER_DRYWET, value, True)
+
     # -----------------------------------------------------------------
     # PluginEdit callbacks
 
@@ -1202,9 +1223,7 @@ class AbstractPluginSlot(QFrame, PluginEditParentMeta):
         # Bypass and Enable/Disable
 
         elif actSel == actBypass:
-            value = 0.0 if actBypass.isChecked() else 1.0
-            self.host.set_drywet(self.fPluginId, value)
-            self.setParameterValue(PARAMETER_DRYWET, value, True)
+            self.toggleDryWetBypass()
 
         elif actSel == actEnable:
             self.setActive(not self.fIsActive, True, True)
@@ -1468,15 +1487,21 @@ class AbstractPluginSlot(QFrame, PluginEditParentMeta):
         # FIXME
         gCarla.gui.compactPlugin(self.fPluginId)
 
+    # def mousePressEvent(self, event):
+        # if event.button() == Qt.MiddleButton and (self.fPluginInfo['hints'] & PLUGIN_CAN_DRYWET):
+            # current = self.host.get_internal_parameter_value(self.fPluginId, PARAMETER_DRYWET)
+            # value = 0.0 if current != 0.0 else 1.0
+            # self.host.set_drywet(self.fPluginId, value)
+            # self.setParameterValue(PARAMETER_DRYWET, value, True)
+            # event.accept()
+            # return
+
+        # QFrame.mousePressEvent(self, event)
     def mousePressEvent(self, event):
         if event.button() == Qt.MiddleButton and (self.fPluginInfo['hints'] & PLUGIN_CAN_DRYWET):
-            current = self.host.get_internal_parameter_value(self.fPluginId, PARAMETER_DRYWET)
-            value = 0.0 if current != 0.0 else 1.0
-            self.host.set_drywet(self.fPluginId, value)
-            self.setParameterValue(PARAMETER_DRYWET, value, True)
+            self.toggleDryWetBypass()
             event.accept()
             return
-
         QFrame.mousePressEvent(self, event)
 
     def closeEvent(self, event):
