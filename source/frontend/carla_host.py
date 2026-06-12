@@ -45,6 +45,7 @@ if qt_config == 5:
         QImageWriter,
         QPainter,
         QPalette,
+        QKeySequence,
     )
     from PyQt5.QtWidgets import (
         QAction,
@@ -54,6 +55,7 @@ if qt_config == 5:
         QListWidgetItem,
         QGraphicsView,
         QMainWindow,
+        QShortcut,
     )
 
 elif qt_config == 6:
@@ -79,6 +81,8 @@ elif qt_config == 6:
         QImageWriter,
         QPainter,
         QPalette,
+        QKeySequence,
+        QShortcut,
     )
     from PyQt6.QtWidgets import (
         QApplication,
@@ -528,6 +532,10 @@ class HostWindow(QMainWindow):
             self.ui.b_transport_forwards.setIcon(getIcon('media-seek-forward', 16, 'svgz'))
             self.ui.logs_clear.setIcon(getIcon('edit-clear', 16, 'svgz'))
             self.ui.logs_save.setIcon(getIcon('document-save', 16, 'svgz'))
+
+        # Bypass key toggle
+        self.fShortToggleBypass = QShortcut(QKeySequence("B"), self)
+        self.fShortToggleBypass.activated.connect(self.slot_toggleBypassSelected)
 
         # ----------------------------------------------------------------------------------------------------
         # Connect actions to functions
@@ -1515,6 +1523,24 @@ class HostWindow(QMainWindow):
             if pitem is None:
                 break
             pitem.expand()
+
+    @pyqtSlot()
+    def slot_toggleBypassSelected(self):
+        if not self.host.is_engine_running():
+            return
+        row = self.ui.listWidget.currentRow()
+        if row < 0 or row >= len(self.fPluginList):
+            return
+        pitem = self.fPluginList[row]
+        if pitem is None:
+            return
+        widget = pitem.getWidget()
+        if (widget.fPluginInfo['hints'] & PLUGIN_CAN_DRYWET) == 0:
+            return
+        pid = widget.fPluginId
+        value = 0.0 if self.host.get_internal_parameter_value(pid, PARAMETER_DRYWET) != 0.0 else 1.0
+        self.host.set_drywet(pid, value)
+        widget.setParameterValue(PARAMETER_DRYWET, value, True)
 
     # --------------------------------------------------------------------------------------------------------
     # Plugins (host callbacks)
