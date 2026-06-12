@@ -1393,28 +1393,25 @@ bool CarlaEngine::loadProject(const char* const filename, const bool setAsCurren
     const File file(filename);
     CARLA_SAFE_ASSERT_RETURN_ERR(file.existsAsFile(), "Requested file does not exist or is not a readable file");
 
-    if (setAsCurrentProject)
-    {
 #ifndef BUILD_BRIDGE_ALTERNATIVE_ARCH
-        if (pData->currentProjectFilename != filename)
-        {
-            pData->currentProjectFilename = filename;
+    // Always resolve the project folder from the file being loaded, so plugins
+    // restoring atom:Path state map relative to the project directory rather
+    // than the process working directory.
+    {
+        pData->currentProjectFolder = filename;
 
-            bool found;
-            const size_t r = pData->currentProjectFilename.rfind(CARLA_OS_SEP, &found);
+        bool found;
+        const size_t r = pData->currentProjectFolder.rfind(CARLA_OS_SEP, &found);
 
-            if (found)
-            {
-                pData->currentProjectFolder = filename;
-                pData->currentProjectFolder[r] = '\0';
-            }
-            else
-            {
-                pData->currentProjectFolder.clear();
-            }
-        }
-#endif
+        if (found)
+            pData->currentProjectFolder[r] = '\0';
+        else
+            pData->currentProjectFolder.clear();
     }
+
+    if (setAsCurrentProject)
+        pData->currentProjectFilename = filename;
+#endif
 
     XmlDocument xml(file);
     return loadProjectInternal(xml, !setAsCurrentProject);
