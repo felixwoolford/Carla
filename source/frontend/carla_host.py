@@ -45,6 +45,7 @@ if qt_config == 5:
         QImageWriter,
         QPainter,
         QPalette,
+        QKeySequence,
     )
     from PyQt5.QtWidgets import (
         QAction,
@@ -54,6 +55,7 @@ if qt_config == 5:
         QListWidgetItem,
         QGraphicsView,
         QMainWindow,
+        QShortcut,
     )
 
 elif qt_config == 6:
@@ -79,6 +81,8 @@ elif qt_config == 6:
         QImageWriter,
         QPainter,
         QPalette,
+        QKeySequence,
+        QShortcut,
     )
     from PyQt6.QtWidgets import (
         QApplication,
@@ -435,6 +439,12 @@ class HostWindow(QMainWindow):
             background-color: black;
           }
         """)
+
+        # Connect shortcuts for shifting plugins
+        self.fShortMovePluginUp = QShortcut(QKeySequence("Ctrl+Up"), self)
+        self.fShortMovePluginUp.activated.connect(self.slot_movePluginUp)
+        self.fShortMovePluginDown = QShortcut(QKeySequence("Ctrl+Down"), self)
+        self.fShortMovePluginDown.activated.connect(self.slot_movePluginDown)
 
         # ----------------------------------------------------------------------------------------------------
         # Set up GUI (patchbay)
@@ -1516,6 +1526,24 @@ class HostWindow(QMainWindow):
                 break
             pitem.expand()
 
+    @pyqtSlot()
+    def slot_movePluginUp(self):
+        self._moveSelectedPlugin(-1)
+
+    @pyqtSlot()
+    def slot_movePluginDown(self):
+        self._moveSelectedPlugin(1)
+
+    def _moveSelectedPlugin(self, delta):
+        row = self.ui.listWidget.currentRow()
+        with open("/tmp/carla_move.log", "a") as f:
+            f.write("delta=%d row=%d count=%d\n" % (delta, row, self.fPluginCount))
+        if row < 0 or self.fPluginCount < 2:
+            return
+        target = row + delta
+        if 0 <= target < self.fPluginCount:
+            self.switchPlugins(row, target)
+            self.ui.listWidget.setCurrentRow(target)
     # --------------------------------------------------------------------------------------------------------
     # Plugins (host callbacks)
 
