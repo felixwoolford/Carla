@@ -454,6 +454,12 @@ class HostWindow(QMainWindow):
         self.fShortToggleBypass = QShortcut(QKeySequence("B"), self)
         self.fShortToggleBypass.activated.connect(self.slot_toggleBypassSelected)
 
+        # Connect shortcuts for shifting plugins
+        self.fShortMovePluginUp = QShortcut(QKeySequence("Ctrl+Up"), self)
+        self.fShortMovePluginUp.activated.connect(self.slot_movePluginUp)
+        self.fShortMovePluginDown = QShortcut(QKeySequence("Ctrl+Down"), self)
+        self.fShortMovePluginDown.activated.connect(self.slot_movePluginDown)
+
         # ----------------------------------------------------------------------------------------------------
         # Set up GUI (patchbay)
 
@@ -1618,6 +1624,22 @@ class HostWindow(QMainWindow):
         value = 0.0 if self.host.get_internal_parameter_value(pid, PARAMETER_DRYWET) != 0.0 else 1.0
         self.host.set_drywet(pid, value)
         widget.setParameterValue(PARAMETER_DRYWET, value, True)
+
+    def slot_movePluginUp(self):
+        self._moveSelectedPlugin(-1)
+
+    @pyqtSlot()
+    def slot_movePluginDown(self):
+        self._moveSelectedPlugin(1)
+
+    def _moveSelectedPlugin(self, delta):
+        row = self.ui.listWidget.currentRow()
+        if row < 0 or self.fPluginCount < 2:
+            return
+        target = row + delta
+        if 0 <= target < self.fPluginCount:
+            self.switchPlugins(row, target)
+            self.ui.listWidget.setCurrentRow(target)
 
     # --------------------------------------------------------------------------------------------------------
     # Plugins (host callbacks)
