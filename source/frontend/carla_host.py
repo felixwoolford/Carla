@@ -1536,8 +1536,6 @@ class HostWindow(QMainWindow):
 
     def _moveSelectedPlugin(self, delta):
         row = self.ui.listWidget.currentRow()
-        with open("/tmp/carla_move.log", "a") as f:
-            f.write("delta=%d row=%d count=%d\n" % (delta, row, self.fPluginCount))
         if row < 0 or self.fPluginCount < 2:
             return
         target = row + delta
