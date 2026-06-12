@@ -1484,19 +1484,10 @@ class AbstractPluginSlot(QFrame, PluginEditParentMeta):
     def mouseDoubleClickEvent(self, event):
         QFrame.mouseDoubleClickEvent(self, event)
 
-        # FIXME
-        gCarla.gui.compactPlugin(self.fPluginId)
+        if event.button() == Qt.LeftButton:
+            # FIXME (pre-existing fixme; predates this change)
+            gCarla.gui.compactPlugin(self.fPluginId)
 
-    # def mousePressEvent(self, event):
-        # if event.button() == Qt.MiddleButton and (self.fPluginInfo['hints'] & PLUGIN_CAN_DRYWET):
-            # current = self.host.get_internal_parameter_value(self.fPluginId, PARAMETER_DRYWET)
-            # value = 0.0 if current != 0.0 else 1.0
-            # self.host.set_drywet(self.fPluginId, value)
-            # self.setParameterValue(PARAMETER_DRYWET, value, True)
-            # event.accept()
-            # return
-
-        # QFrame.mousePressEvent(self, event)
     def mousePressEvent(self, event):
         if event.button() == Qt.MiddleButton and (self.fPluginInfo['hints'] & PLUGIN_CAN_DRYWET):
             self.toggleDryWetBypass()
