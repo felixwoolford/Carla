@@ -160,6 +160,7 @@ class RackListItem(QListWidgetItem):
             self.fOptions['skin'] = newSkin
 
         wasGuiShown = None
+        savedDryWet = self.fWidget.fSavedDryWet if self.fWidget is not None else 1.0
 
         if self.fWidget is not None and self.fWidget.b_gui is not None:
             wasGuiShown = self.fWidget.b_gui.isChecked()
@@ -168,6 +169,7 @@ class RackListItem(QListWidgetItem):
 
         self.fWidget = createPluginSlot(self.fParent, self.host, self.fPluginId, self.fOptions)
         self.fWidget.setFixedHeight(self.fWidget.getFixedHeight())
+        self.fWidget.fSavedDryWet = savedDryWet
 
         if wasGuiShown and self.fWidget.b_gui is not None:
             self.fWidget.b_gui.setChecked(True)
@@ -182,11 +184,13 @@ class RackListItem(QListWidgetItem):
 
     def recreateWidget2(self, wasCompacted, wasGuiShown):
         self.fOptions['compact'] = wasCompacted
+        savedDryWet = self.fWidget.fSavedDryWet if self.fWidget is not None else 1.0
 
         self.close()
 
         self.fWidget = createPluginSlot(self.fParent, self.host, self.fPluginId, self.fOptions)
         self.fWidget.setFixedHeight(self.fWidget.getFixedHeight())
+        self.fWidget.fSavedDryWet = savedDryWet
 
         if wasGuiShown and self.fWidget.b_gui is not None:
             self.fWidget.b_gui.setChecked(True)
